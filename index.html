@@ -11,7 +11,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
 
+/* Supaya tombol tidak berubah jadi biru saat ditekan lama */
+button:focus, div:focus {
+    outline: none;
+}
         /* ── FLOATING CS BUTTON ── */
         .cs-fab {
             position: fixed; bottom: 24px; right: 20px;
