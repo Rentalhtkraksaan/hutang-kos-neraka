@@ -1,0 +1,229 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f7f8f9; /* Light grey app background */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Mobile-first centering app container */
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    background-color: #f7f8f9;
+    padding-bottom: 40px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    min-height: 100vh;
+}
+
+/* Top header decorative area like Akulaku */
+.header-bg {
+    background: linear-gradient(135deg, #ff5e00 0%, #ff3b30 100%);
+    padding: 30px 20px 80px 20px;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    color: white;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Akulaku style balance card */
+.balance-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    margin: -50px 20px 20px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 10;
+}
+
+.balance-label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.balance-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.balance-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff0eb;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ff5e00;
+}
+
+/* Card General */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 0 20px 20px 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-title svg {
+    color: #999;
+}
+
+/* Logs / Transactions */
+.log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.log-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.log-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.log-amount {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.text-positive {
+    color: #2e7d32; /* Green for payments */
+}
+
+.text-negative {
+    color: #d32f2f; /* Red for debts */
+}
+
+.log-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #999;
+}
+
+/* Utils */
+.empty-state {
+    text-align: center;
+    padding: 30px 0;
+    color: #aaa;
+}
+
+.empty-state svg {
+    opacity: 0.3;
+    margin-bottom: 10px;
+}
+
+.nav-links {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    background: transparent;
+    color: #999;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #ff5e00;
+}
+
+/* Forms (for admin) */
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 13px;
+    font-weight: 500;
+}
+.form-control {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    color: #333;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+.form-control:focus {
+    outline: none;
+    border-color: #ff5e00;
+    background: #fff;
+}
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #ff5e00 0%, #ff3b30 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255, 94, 0, 0.3);
+    transition: transform 0.1s;
+}
+.btn-primary:active {
+    transform: scale(0.98);
+}
