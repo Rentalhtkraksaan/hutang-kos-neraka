@@ -443,11 +443,14 @@
 <!-- Modal Data Peminjam -->
 <div class="modal-backdrop" id="modal" onclick="if(event.target===this)closeModal()">
     <div class="modal-box" id="modalBox">
-        <div class="modal-header-bar">
-            <button class="modal-close-btn" onclick="closeModal()">←</button>
+        <div class="modal-header-bar" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="width:30px;"></div> 
+            
             <span class="modal-title">Detail Tagihan</span>
-            <div style="width:30px;"></div>
+            
+            <button class="modal-close-btn" onclick="closeModal()" style="font-size: 24px; font-weight: bold; background: none; border: none; cursor: pointer;">&times;</button>
         </div>
+
         <div class="dt-top">
             <div class="dt-top-left">
                 <div class="dt-label">Jatuh Tempo</div>
@@ -458,6 +461,7 @@
                 <div class="dt-amount" id="modalSaldo">-</div>
             </div>
         </div>
+
         <div class="dt-section">
             <div class="dt-row">
                 <span class="dt-row-label">Total Tagihan</span>
@@ -468,6 +472,7 @@
                 <span class="dt-row-value" id="modalTotalDibayar">-</span>
             </div>
         </div>
+
         <div class="dt-section">
             <div class="dt-row">
                 <span class="dt-row-label">Total pinjaman</span>
@@ -490,6 +495,7 @@
                 <span class="dt-row-value red">Rp 540.000</span>
             </div>
         </div>
+
         <div class="dt-section">
             <div class="dt-row">
                 <span class="dt-row-label">Tanggal pinjam</span>
@@ -507,6 +513,7 @@
                 </div>
             </div>
         </div>
+
         <div class="dt-pay-bar">
             <button class="dt-pay-btn" onclick="closeModal(); openPayModal();">Bayar Sekarang</button>
         </div>
