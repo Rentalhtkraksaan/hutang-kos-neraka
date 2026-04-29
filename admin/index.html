@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard - Tagihan Hoirul</title>
+    <meta name="description" content="Admin panel untuk mengelola tagihan dan transaksi">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary: #ff5e00; --secondary: #ff3b30;
+            --bg: #f4f7fa; --card: #ffffff;
+            --text-dark: #2d3436; --text-gray: #636e72;
+            --success: #00b894; --danger: #d63031;
+            --radius: 20px; --shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text-dark);
+            line-height: 1.6; display: flex; justify-content: center; min-height: 100vh;
+        }
+        .admin-wrapper {
+            width: 100%; max-width: 480px; background: var(--bg);
+            min-height: 100vh; position: relative; padding-bottom: 50px;
+        }
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 30px 20px 45px; border-radius: 0 0 35px 35px;
+            text-align: center; color: white;
+            box-shadow: 0 10px 20px rgba(255,94,0,0.2);
+        }
+        .admin-header-row {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        .admin-header h2 { font-size: 18px; font-weight: 800; }
+        .btn-logout {
+            background: rgba(255,255,255,0.2); padding: 6px 15px;
+            border-radius: 12px; color: #fff; text-decoration: none;
+            font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            font-family: inherit;
+        }
+        .saldo-hero-label { font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+        .saldo-hero-value { font-size: 32px; font-weight: 900; margin-top: 5px; }
+
+        .a-card {
+            background: var(--card); border-radius: var(--radius);
+            margin: -25px 16px 20px; padding: 20px;
+            box-shadow: var(--shadow); position: relative; z-index: 10;
+        }
+        .a-card + .a-card { margin-top: 0; }
+        .a-card-title {
+            font-size: 13px; font-weight: 800; color: var(--text-gray);
+            text-transform: uppercase; margin-bottom: 15px;
+            display: block; border-bottom: 1px solid #f1f1f1; padding-bottom: 10px;
+        }
+
+        .fee-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .fee-box {
+            background: #fafafa; padding: 10px 5px; border-radius: 15px;
+            text-align: center; border: 1px solid #eee;
+        }
+        .fee-box-label { font-size: 9px; color: var(--text-gray); display: block; }
+        .fee-box-value { font-size: 12px; font-weight: 800; color: var(--primary); }
+        .fee-box-pct   { font-size: 9px; color: #bbb; margin-top: 2px; }
+
+        .f-group { margin-bottom: 15px; }
+        .f-group label { font-size: 12px; font-weight: 700; display: block; margin-bottom: 8px; }
+        .f-input {
+            width: 100%; padding: 12px 15px; border-radius: 12px;
+            border: 2px solid #eee; font-family: inherit; font-size: 14px;
+            transition: 0.3s; outline: none;
+        }
+        .f-input:focus { border-color: var(--primary); }
+        .radio-group { display: flex; gap: 10px; }
+        .radio-label {
+            flex: 1; padding: 12px; border: 2px solid #eee; border-radius: 12px;
+            text-align: center; font-size: 13px; font-weight: 700; cursor: pointer;
+        }
+        .radio-label.active-pay  { border-color: var(--success); color: var(--success); background: #f0fff4; }
+        .radio-label.active-debt { border-color: var(--primary); color: var(--primary); background: #fff5f0; }
+        .btn-submit {
+            width: 100%; padding: 15px; background: #1e272e; color: white;
+            border: none; border-radius: 15px; font-weight: 800; font-size: 15px;
+            cursor: pointer; margin-top: 10px; font-family: inherit; transition: opacity 0.2s;
+        }
+        .btn-submit:hover { opacity: 0.85; }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .trx-item { padding: 15px 0; border-bottom: 1px solid #f1f1f1; }
+        .trx-top { display: flex; justify-content: space-between; align-items: center; }
+        .trx-name { font-size: 14px; font-weight: 700; color: #2d3436; max-width: 60%; }
+        .trx-amount { font-size: 15px; font-weight: 800; text-align: right; }
+        .trx-amount.red   { color: var(--danger); }
+        .trx-amount.green { color: var(--success); }
+        .trx-meta {
+            font-size: 11px; color: var(--text-gray);
+            display: flex; justify-content: space-between;
+            margin-top: 5px; margin-bottom: 10px;
+        }
+        .badge-hidden {
+            display: inline-block; background: #fff3e0; color: #e65100;
+            font-size: 9px; font-weight: 700; padding: 2px 7px;
+            border-radius: 6px; margin-left: 6px;
+        }
+        .is-hidden .trx-name { opacity: 0.5; }
+        .trx-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+        .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; font-family: inherit; }
+        .btn-edit { background: #e1f5fe; color: #039be5; }
+        .btn-del  { background: #ffebee; color: #e53935; }
+        .btn-hide { background: #fff3e0; color: #e65100; }
+        .btn-show { background: #e8f5e9; color: #2e7d32; }
+
+        .alert {
+            margin: 16px 16px 0; padding: 14px 16px;
+            border-radius: 12px; font-size: 13px; font-weight: 600;
+        }
+        .alert-success { background: #e8f5e9; color: #2e7d32; }
+        .alert-error   { background: #ffebee; color: #c62828; }
+
+        /* Modal Edit */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: flex-end; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white; width: 100%; max-width: 480px;
+            padding: 25px; border-radius: 25px 25px 0 0;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @media (min-width: 481px) {
+            .modal-overlay { align-items: center; }
+            .modal-box { border-radius: 25px; }
+        }
+        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-cancel { flex: 1; padding: 13px; background: #f4f5f7; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-save { flex: 2; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+
+        .footer-nav { text-align: center; padding: 20px 16px; }
+        .footer-nav a { color: var(--text-gray); text-decoration: none; font-size: 13px; }
+
+        /* Spinner */
+        .loading-state { text-align: center; padding: 30px 0; color: #ccc; }
+        .spinner {
+            width: 28px; height: 28px; border: 3px solid #f0f0f0;
+            border-top-color: #ff5e00; border-radius: 50%;
+            animation: spin 0.7s linear infinite; margin: 0 auto 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="admin-wrapper">
+
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="admin-header-row">
+            <h2>⚙️ Admin Panel</h2>
+            <button class="btn-logout" onclick="doLogout()">Keluar</button>
+        </div>
+        <div class="saldo-hero">
+            <div class="saldo-hero-label">Total Sisa Tagihan Hoirul</div>
+            <div class="saldo-hero-value" id="saldoHero">Memuat...</div>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div id="alertBox" style="display:none;"></div>
+
+    <!-- Breakdown Fee -->
+    <div class="a-card">
+        <div class="a-card-title">💰 Breakdown Biaya (20%)</div>
+        <div class="fee-grid">
+            <div class="fee-box">
+                <div class="fee-box-label">Admin</div>
+                <div class="fee-box-value" id="feeAdmin">-</div>
+                <div class="fee-box-pct">5% per bayar</div>
+            </div>
+            <div class="fee-box">
+                <div class="fee-box-label">Nama Baik</div>
+                <div class="fee-box-value" id="feeNama">-</div>
+                <div class="fee-box-pct">12% per bayar</div>
+            </div>
+            <div class="fee-box">
+                <div class="fee-box-label">Akomodasi</div>
+                <div class="fee-box-value" id="feeAkom">-</div>
+                <div class="fee-box-pct">3% per bayar</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Tambah Transaksi -->
+    <div class="a-card">
+        <div class="a-card-title">➕ Tambah Transaksi</div>
+        <div class="f-group">
+            <label>Jenis Transaksi</label>
+            <div class="radio-group">
+                <label class="radio-label active-pay" id="lbl-pay">
+                    <input type="radio" name="tx_type" value="pay_debt" checked onchange="switchType(this)">
+                    ✅ Pembayaran
+                </label>
+                <label class="radio-label" id="lbl-debt">
+                    <input type="radio" name="tx_type" value="bunga_bulanan" onchange="switchType(this)">
+                    📈 Bunga Bulanan
+                </label>
+            </div>
+        </div>
+        <div class="f-group">
+            <label>Tanggal Transaksi</label>
+            <input type="date" id="txDate" class="f-input" required>
+        </div>
+        <div class="f-group">
+            <label>Nominal (Rp)</label>
+            <input type="number" id="txAmount" class="f-input" required placeholder="Contoh: 500000">
+        </div>
+        <div class="f-group">
+            <label>Keterangan</label>
+            <input type="text" id="txDesc" class="f-input" required placeholder="Contoh: Bayar Cicilan Bulan Ini">
+        </div>
+        <button class="btn-submit" id="btnSubmit" onclick="addTransaction()">Simpan Transaksi</button>
+    </div>
+
+    <!-- Riwayat Transaksi -->
+    <div class="a-card">
+        <div class="a-card-title">📋 Riwayat Transaksi</div>
+        <div id="trxList">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                Memuat data...
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-nav">
+        <a href="../index.html">← Lihat Halaman User</a>
+    </div>
+
+</div>
+
+<!-- Modal Edit -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-title">✏️ Edit Transaksi</div>
+        <div class="f-group">
+            <label>Keterangan</label>
+            <input type="text" id="edit_description" class="f-input" required>
+        </div>
+        <div class="f-group">
+            <label>Nominal Asli (Rp)</label>
+            <input type="number" id="edit_amount" class="f-input" required>
+        </div>
+        <div class="f-group">
+            <label>Tanggal</label>
+            <input type="date" id="edit_date" class="f-input" required>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeEdit()">Batal</button>
+            <button class="btn-save" onclick="saveEdit()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+    getDatabase, ref, onValue, get, set, push, update, remove
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBVDSAuf-jqAp-KwG5JcLTdgy2MPidSs_M",
+    authDomain: "utang-1.firebaseapp.com",
+    databaseURL: "https://utang-1-default-rtdb.firebaseio.com",
+    projectId: "utang-1",
+    storageBucket: "utang-1.firebasestorage.app",
+    messagingSenderId: "382580515654",
+    appId: "1:382580515654:web:b4859edf022d165c997b47",
+    measurementId: "G-D1P26PNZV1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ── AUTH CHECK ──────────────────────────────────────────────────────────────
+if (sessionStorage.getItem('admin_logged_in') !== 'true') {
+    window.location.href = 'login.html';
+}
+
+// Set today's date as default
+document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function formatRp(n) {
+    if (typeof n !== 'number') n = parseFloat(n) || 0;
+    return 'Rp ' + n.toLocaleString('id-ID');
+}
+function showAlert(msg, type) {
+    const box = document.getElementById('alertBox');
+    box.innerHTML = `<div class="alert alert-${type}" style="margin:16px 16px 0;">${msg}</div>`;
+    box.style.display = 'block';
+    setTimeout(() => { box.style.display = 'none'; }, 3500);
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentSaldo = 0;
+let currentFees  = { fee_admin: 0, fee_nama_baik: 0, fee_akomodasi: 0 };
+let allTransactions = [];
+let editKey = null;
+
+// ── REALTIME LISTENERS ───────────────────────────────────────────────────────
+onValue(ref(db, 'settings'), (snap) => {
+    const data = snap.val() || {};
+    currentSaldo     = parseFloat(data.saldo) || 0;
+    currentFees      = {
+        fee_admin:     parseFloat(data.fee_admin)     || 0,
+        fee_nama_baik: parseFloat(data.fee_nama_baik) || 0,
+        fee_akomodasi: parseFloat(data.fee_akomodasi) || 0,
+    };
+
+    document.getElementById('saldoHero').textContent = formatRp(currentSaldo);
+    document.getElementById('feeAdmin').textContent  = formatRp(currentFees.fee_admin);
+    document.getElementById('feeNama').textContent   = formatRp(currentFees.fee_nama_baik);
+    document.getElementById('feeAkom').textContent   = formatRp(currentFees.fee_akomodasi);
+});
+
+onValue(ref(db, 'transactions'), (snap) => {
+    allTransactions = [];
+    if (snap.exists()) {
+        snap.forEach(child => {
+            allTransactions.push({ key: child.key, ...child.val() });
+        });
+        allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+    renderTransactions();
+});
+
+// ── AUTO BUNGA CHECK (setiap tgl 7) ─────────────────────────────────────────
+async function checkAutoBunga() {
+    const now   = new Date();
+    const day   = now.getDate();
+    const month = now.getMonth() + 1;
+    const year  = now.getFullYear();
+
+    if (day >= 7) {
+        const key  = `auto_bunga_${month}_${year}`;
+        const snap = await get(ref(db, `settings/${key}`));
+        if (!snap.exists()) {
+            const saldoSnap  = await get(ref(db, 'settings/saldo'));
+            const sal        = parseFloat(saldoSnap.val()) || 0;
+            const newSaldo   = sal + 180000;
+            const dateStr    = now.toISOString();
+
+            await set(ref(db, 'settings/saldo'), newSaldo);
+            await push(ref(db, 'transactions'), {
+                date:          dateStr,
+                type:          'Bunga Bulanan Otomatis',
+                amount:        180000,
+                current_saldo: newSaldo,
+                hidden:        false
+            });
+            await set(ref(db, `settings/${key}`), true);
+        }
+    }
+}
+checkAutoBunga();
+
+// ── RENDER TRANSACTIONS ──────────────────────────────────────────────────────
+function renderTransactions() {
+    const list = document.getElementById('trxList');
+    if (allTransactions.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:30px;color:#ccc;font-size:13px;">Belum ada transaksi.</div>';
+        return;
+    }
+
+    list.innerHTML = allTransactions.map(t => {
+        const amt       = parseFloat(t.amount);
+        const isPayment = amt < 0;
+        const amtClass  = isPayment ? 'green' : 'red';
+        const sign      = isPayment ? '−' : '+';
+        const parts     = t.type.split(': ');
+        const descLabel = parts.length > 1 ? parts.slice(1).join(': ') : t.type;
+        const origAmt   = isPayment ? Math.round(Math.abs(amt) / 0.8) : Math.abs(amt);
+        const isHidden  = !!t.hidden;
+        const dateObj   = new Date(t.date);
+        const dateStr   = dateObj.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        const dateISO   = dateObj.toISOString().split('T')[0];
+
+        return `
+        <div class="trx-item ${isHidden ? 'is-hidden' : ''}">
+            <div class="trx-top">
+                <div class="trx-name">
+                    ${t.type}
+                    ${isHidden ? '<span class="badge-hidden">Tersembunyi</span>' : ''}
+                </div>
+                <div class="trx-amount ${amtClass}">${sign}${formatRp(Math.abs(amt))}</div>
+            </div>
+            <div class="trx-meta">
+                <span>${dateStr}</span>
+                <span>Sisa: ${formatRp(parseFloat(t.current_saldo))}</span>
+            </div>
+            <div class="trx-actions">
+                <button class="btn-sm btn-edit" onclick="openEdit('${t.key}','${descLabel.replace(/'/g,"\\'")}',${origAmt},'${dateISO}')">✏ Edit</button>
+                <button class="btn-sm ${isHidden ? 'btn-show' : 'btn-hide'}" onclick="toggleHidden('${t.key}',${isHidden})">${isHidden ? '👁 Tampilkan' : '🙈 Sembunyikan'}</button>
+                <button class="btn-sm btn-del" onclick="deleteTransaction('${t.key}')">🗑 Hapus</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── ADD TRANSACTION ──────────────────────────────────────────────────────────
+window.addTransaction = async () => {
+    const txType  = document.querySelector('input[name="tx_type"]:checked').value;
+    const amount  = parseFloat(document.getElementById('txAmount').value);
+    const desc    = document.getElementById('txDesc').value.trim();
+    const txDate  = document.getElementById('txDate').value || new Date().toISOString().split('T')[0];
+
+    if (!amount || amount <= 0 || !desc) { showAlert('Nominal dan keterangan tidak boleh kosong!', 'error'); return; }
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+    try {
+        const saldoSnap = await get(ref(db, 'settings/saldo'));
+        let saldo       = parseFloat(saldoSnap.val()) || 0;
+        const dateISO   = new Date(txDate + 'T' + new Date().toTimeString().slice(0,8)).toISOString();
+
+        if (txType === 'bunga_bulanan') {
+            const newSaldo = saldo + amount;
+            await set(ref(db, 'settings/saldo'), newSaldo);
+            await push(ref(db, 'transactions'), {
+                date: dateISO, type: 'Bunga Bulanan: ' + desc,
+                amount, current_saldo: newSaldo, hidden: false
+            });
+            showAlert('Bunga bulanan berhasil ditambahkan!', 'success');
+
+        } else { // pay_debt
+            const amountPaid = amount * 0.8;
+            const newSaldo   = saldo - amountPaid;
+            const feeAdmin   = amount * 0.05;
+            const feeNama    = amount * 0.12;
+            const feeAkom    = amount * 0.03;
+
+            const feeSnap    = await get(ref(db, 'settings'));
+            const feeData    = feeSnap.val() || {};
+
+            await update(ref(db, 'settings'), {
+                saldo:         newSaldo,
+                fee_admin:     (parseFloat(feeData.fee_admin)     || 0) + feeAdmin,
+                fee_nama_baik: (parseFloat(feeData.fee_nama_baik) || 0) + feeNama,
+                fee_akomodasi: (parseFloat(feeData.fee_akomodasi) || 0) + feeAkom,
+            });
+            await push(ref(db, 'transactions'), {
+                date:          dateISO,
+                type:          'Pembayaran: ' + desc,
+                amount:        -amountPaid,
+                current_saldo: newSaldo,
+                split_details: JSON.stringify({ fee_admin: feeAdmin, fee_nama_baik: feeNama, fee_akomodasi: feeAkom }),
+                hidden:        false
+            });
+            showAlert('Pembayaran berhasil dicatat!', 'success');
+        }
+
+        document.getElementById('txAmount').value = '';
+        document.getElementById('txDesc').value   = '';
+    } catch (err) {
+        showAlert('Gagal menyimpan: ' + err.message, 'error');
+    }
+
+    btn.disabled = false; btn.textContent = 'Simpan Transaksi';
+};
+
+// ── TOGGLE HIDDEN ────────────────────────────────────────────────────────────
+window.toggleHidden = async (key, isHidden) => {
+    try {
+        await update(ref(db, `transactions/${key}`), { hidden: !isHidden });
+        showAlert(isHidden ? 'Transaksi ditampilkan ke user.' : 'Transaksi disembunyikan dari user.', 'success');
+    } catch (err) {
+        showAlert('Gagal: ' + err.message, 'error');
+    }
+};
+
+// ── DELETE TRANSACTION ───────────────────────────────────────────────────────
+window.deleteTransaction = async (key) => {
+    if (!confirm('Yakin hapus transaksi ini? Saldo akan disesuaikan.')) return;
+
+    try {
+        const trxSnap = await get(ref(db, `transactions/${key}`));
+        const trx     = trxSnap.val();
+        if (!trx) return;
+
+        const saldoSnap = await get(ref(db, 'settings/saldo'));
+        const sal       = parseFloat(saldoSnap.val()) || 0;
+        const reversed  = sal - parseFloat(trx.amount);
+
+        const updates = { saldo: reversed };
+
+        // Reverse fees if it was a payment
+        if (parseFloat(trx.amount) < 0 && trx.split_details) {
+            const split = JSON.parse(trx.split_details);
+            const feeSnap = await get(ref(db, 'settings'));
+            const feeData = feeSnap.val() || {};
+            if (split.fee_admin)     updates.fee_admin     = Math.max(0, (parseFloat(feeData.fee_admin)     || 0) - split.fee_admin);
+            if (split.fee_nama_baik) updates.fee_nama_baik = Math.max(0, (parseFloat(feeData.fee_nama_baik) || 0) - split.fee_nama_baik);
+            if (split.fee_akomodasi) updates.fee_akomodasi = Math.max(0, (parseFloat(feeData.fee_akomodasi) || 0) - split.fee_akomodasi);
+        }
+
+        await update(ref(db, 'settings'), updates);
+        await remove(ref(db, `transactions/${key}`));
+        showAlert('Transaksi berhasil dihapus!', 'success');
+    } catch (err) {
+        showAlert('Gagal hapus: ' + err.message, 'error');
+    }
+};
+
+// ── EDIT TRANSACTION ─────────────────────────────────────────────────────────
+window.openEdit = (key, desc, amount, date) => {
+    editKey = key;
+    document.getElementById('edit_description').value = desc;
+    document.getElementById('edit_amount').value      = amount;
+    document.getElementById('edit_date').value        = date;
+    document.getElementById('editModal').classList.add('active');
+};
+
+window.closeEdit = () => {
+    document.getElementById('editModal').classList.remove('active');
+    editKey = null;
+};
+
+window.saveEdit = async () => {
+    const newDesc   = document.getElementById('edit_description').value.trim();
+    const newAmount = parseFloat(document.getElementById('edit_amount').value);
+    const newDate   = document.getElementById('edit_date').value;
+
+    if (!newDesc || !newAmount || newAmount <= 0) { showAlert('Data tidak valid!', 'error'); return; }
+
+    try {
+        const trxSnap  = await get(ref(db, `transactions/${editKey}`));
+        const trxOld   = trxSnap.val();
+        if (!trxOld) { showAlert('Transaksi tidak ditemukan!', 'error'); return; }
+
+        const isPayment  = parseFloat(trxOld.amount) < 0;
+        const oldAmount  = parseFloat(trxOld.amount);
+        const dateISO    = new Date(newDate + 'T' + new Date().toTimeString().slice(0,8)).toISOString();
+
+        let newAmountSigned, newType;
+        const feeSnap = await get(ref(db, 'settings'));
+        const feeData = feeSnap.val() || {};
+        const saldo   = parseFloat(feeData.saldo) || 0;
+        const updates = {};
+
+        if (isPayment) {
+            newAmountSigned  = -(newAmount * 0.8);
+            const oldFull    = Math.abs(oldAmount) / 0.8;
+            updates.fee_admin     = Math.max(0, (parseFloat(feeData.fee_admin)     || 0) - oldFull * 0.05 + newAmount * 0.05);
+            updates.fee_nama_baik = Math.max(0, (parseFloat(feeData.fee_nama_baik) || 0) - oldFull * 0.12 + newAmount * 0.12);
+            updates.fee_akomodasi = Math.max(0, (parseFloat(feeData.fee_akomodasi) || 0) - oldFull * 0.03 + newAmount * 0.03);
+            const parts      = trxOld.type.split(':');
+            const prefix     = parts.length > 1 ? parts[0].trim() : 'Pembayaran';
+            newType          = prefix + ': ' + newDesc;
+        } else {
+            newAmountSigned = newAmount;
+            const parts     = trxOld.type.split(':');
+            const prefix    = parts.length > 1 ? parts[0].trim() : 'Bunga Bulanan';
+            newType         = prefix + ': ' + newDesc;
+        }
+
+        const diff         = newAmountSigned - oldAmount;
+        const adjustedSaldo = saldo + diff;
+        updates.saldo      = adjustedSaldo;
+        await update(ref(db, 'settings'), updates);
+
+        const trxUpdate = {
+            date:          dateISO,
+            type:          newType,
+            amount:        newAmountSigned,
+            current_saldo: adjustedSaldo,
+        };
+        if (isPayment) {
+            trxUpdate.split_details = JSON.stringify({
+                fee_admin:     updates.fee_admin,
+                fee_nama_baik: updates.fee_nama_baik,
+                fee_akomodasi: updates.fee_akomodasi,
+            });
+        }
+        await update(ref(db, `transactions/${editKey}`), trxUpdate);
+
+        showAlert('Transaksi berhasil diperbarui!', 'success');
+        closeEdit();
+    } catch (err) {
+        showAlert('Gagal edit: ' + err.message, 'error');
+    }
+};
+
+// ── UI HELPERS ───────────────────────────────────────────────────────────────
+window.switchType = (el) => {
+    document.getElementById('lbl-pay').className  = 'radio-label';
+    document.getElementById('lbl-debt').className = 'radio-label';
+    if (el.value === 'pay_debt') document.getElementById('lbl-pay').classList.add('active-pay');
+    else document.getElementById('lbl-debt').classList.add('active-debt');
+};
+
+window.doLogout = () => {
+    sessionStorage.removeItem('admin_logged_in');
+    window.location.href = 'login.html';
+};
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEdit();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEdit(); });
+</script>
+
+</body>
+</html>

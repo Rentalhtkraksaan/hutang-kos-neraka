@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Login - Tagihan Hoirul</title>
+    <meta name="description" content="Halaman login admin panel tagihan">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #ff5e00 0%, #ff3b30 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to   { transform: translateY(0); opacity: 1; }
+        }
+        .login-logo {
+            width: 60px; height: 60px; background: linear-gradient(135deg, #ff5e00, #ff3b30);
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 28px;
+        }
+        .login-title { font-size: 22px; font-weight: 800; color: #222; text-align: center; margin-bottom: 6px; }
+        .login-sub { font-size: 13px; color: #aaa; text-align: center; margin-bottom: 28px; }
+        .f-group { margin-bottom: 16px; }
+        .f-group label { font-size: 12px; font-weight: 700; display: block; margin-bottom: 8px; color: #444; }
+        .f-input {
+            width: 100%; padding: 13px 16px; border-radius: 12px;
+            border: 2px solid #eee; font-family: inherit; font-size: 14px;
+            transition: border-color 0.2s; outline: none; color: #333;
+        }
+        .f-input:focus { border-color: #ff5e00; }
+        .btn-login {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #ff5e00, #ff3b30);
+            color: #fff; border: none; border-radius: 14px; font-size: 16px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+            margin-top: 8px; transition: opacity 0.2s;
+        }
+        .btn-login:hover { opacity: 0.9; }
+        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+        .error-msg {
+            background: #ffebee; color: #c62828; border-radius: 10px;
+            padding: 12px 16px; font-size: 13px; margin-bottom: 16px;
+            display: none; font-weight: 500;
+        }
+        .back-link {
+            display: block; text-align: center; margin-top: 24px;
+            color: #aaa; text-decoration: none; font-size: 13px;
+        }
+        .back-link:hover { color: #ff5e00; }
+        .loading-dots { display: inline-block; }
+        .loading-dots::after { content: '...'; animation: dots 1s infinite; }
+        @keyframes dots {
+            0%  { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="login-logo">⚙️</div>
+    <div class="login-title">Dashboard Admin</div>
+    <div class="login-sub">Tagihan Akulaku Khoirul</div>
+
+    <div class="error-msg" id="errorMsg">Username atau password salah!</div>
+
+    <form id="loginForm" onsubmit="doLogin(event)">
+        <div class="f-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" class="f-input" placeholder="Masukkan username" autocomplete="off" required>
+        </div>
+        <div class="f-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" class="f-input" placeholder="Masukkan password" required>
+        </div>
+        <button type="submit" class="btn-login" id="loginBtn">Masuk</button>
+    </form>
+
+    <a href="../index.html" class="back-link">← Kembali ke Halaman Utama</a>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBVDSAuf-jqAp-KwG5JcLTdgy2MPidSs_M",
+    authDomain: "utang-1.firebaseapp.com",
+    databaseURL: "https://utang-1-default-rtdb.firebaseio.com",
+    projectId: "utang-1",
+    storageBucket: "utang-1.firebasestorage.app",
+    messagingSenderId: "382580515654",
+    appId: "1:382580515654:web:b4859edf022d165c997b47",
+    measurementId: "G-D1P26PNZV1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// Check if already logged in
+if (sessionStorage.getItem('admin_logged_in') === 'true') {
+    window.location.href = 'index.html';
+}
+
+// Initialize default settings on first load
+async function initDefaults() {
+    const snap = await get(ref(db, 'settings'));
+    if (!snap.exists()) {
+        await set(ref(db, 'settings'), {
+            saldo:          2065000,
+            fee_admin:      0,
+            fee_nama_baik:  0,
+            fee_akomodasi:  0,
+            admin_username: 'admin',
+            admin_password: 'admin123'
+        });
+    }
+}
+initDefaults();
+
+window.doLogin = async (e) => {
+    e.preventDefault();
+    const btn      = document.getElementById('loginBtn');
+    const errMsg   = document.getElementById('errorMsg');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    btn.disabled   = true;
+    btn.innerHTML  = 'Memeriksa<span class="loading-dots"></span>';
+    errMsg.style.display = 'none';
+
+    try {
+        const snap = await get(ref(db, 'settings'));
+        const data = snap.val() || {};
+        const dbUser = data.admin_username || 'admin';
+        const dbPass = data.admin_password || 'admin123';
+
+        if (username === dbUser && password === dbPass) {
+            sessionStorage.setItem('admin_logged_in', 'true');
+            window.location.href = 'index.html';
+        } else {
+            errMsg.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = 'Masuk';
+        }
+    } catch (err) {
+        errMsg.textContent = 'Gagal terhubung ke database. Coba lagi.';
+        errMsg.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = 'Masuk';
+    }
+};
+</script>
+</body>
+</html>
