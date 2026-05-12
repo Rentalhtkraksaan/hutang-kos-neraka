@@ -1226,7 +1226,7 @@
                 <div class="dt-no-row">
                     <span class="dt-no-label">Nomor Pinjaman</span>
                     <div class="dt-no-val-wrap">
-                        <span class="dt-no-val" id="noPinjaman">0100701007067001125</span>
+                        <span class="dt-no-val" id="noPinjaman">Memuat...</span>
                         <button class="dt-copy-btn" onclick="copyNoPinjaman()">Salin</button>
                     </div>
                 </div>
@@ -1330,6 +1330,10 @@
             document.getElementById('modalJatuhTempo2').textContent = jt;
             document.getElementById('modalSaldo').textContent = formatRp(currentSaldo);
 
+            // Load nomor pinjaman from Firebase settings
+            const noPinjaman = data.noPinjaman || '-';
+            document.getElementById('noPinjaman').textContent = noPinjaman;
+
             updateStats();
         });
 
@@ -1388,7 +1392,8 @@
                 const feeAkom = Math.round(origAmt * 0.03);
                 const totalFee = feeAdmin + feeNama + feeAkom;
                 const masuk = Math.abs(amt);
-                const noTrx = 'TRX-' + t.key.substring(0, 8).toUpperCase() + '-' + dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '');
+                const autoNoTrx = 'TRX-' + t.key.substring(0, 8).toUpperCase() + '-' + dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '');
+                const noTrx = t.noTrx || autoNoTrx; // Pakai custom noTrx kalau ada
 
                 const trxData = JSON.stringify({
                     key: t.key, type: t.type, date: dateStr,
