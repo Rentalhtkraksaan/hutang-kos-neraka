@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Nomor Transaksi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0d0d14;
+            min-height: 100vh;
+            padding-bottom: 40px;
+            color: #e8e8f0;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 1px solid #2a2a40;
+            padding: 20px 20px 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .header h1 {
+            font-size: 17px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .live-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4caf50;
+        }
+
+        .live-dot::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 1.4s ease infinite;
+        }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+        /* ── SEARCH / FILTER ── */
+        .search-wrap {
+            padding: 14px 16px;
+            position: sticky;
+            top: 65px;
+            z-index: 99;
+            background: #0d0d14;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #1a1a26;
+            border: 1.5px solid #2a2a3a;
+            border-radius: 12px;
+            padding: 12px 16px 12px 40px;
+            font-size: 13px;
+            color: #e8e8f0;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus { border-color: #e53935; }
+        .search-input::placeholder { color: #444; }
+
+        .search-wrap .icon {
+            position: absolute;
+            left: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #444;
+        }
+
+        .search-rel { position: relative; }
+
+        /* ── FILTER TABS ── */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 16px 14px;
+        }
+
+        .filter-tab {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid #2a2a3a;
+            color: #666;
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: #e53935;
+            border-color: #e53935;
+            color: #fff;
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0 16px 10px;
+        }
+
+        /* ── TRX CARD ── */
+        .trx-list {
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .trx-card {
+            background: #1a1a26;
+            border: 1.5px solid #25253a;
+            border-radius: 16px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trx-card:hover {
+            border-color: #e53935;
+            background: #1e1e2e;
+        }
+
+        .trx-card.has-custom {
+            border-color: #1565c0;
+            background: #0d1a2e;
+        }
+
+        .trx-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+
+        .trx-type {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e8e8f0;
+        }
+
+        .trx-amt {
+            font-size: 14px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .trx-amt.green { color: #4caf50; }
+        .trx-amt.red { color: #e53935; }
+
+        .trx-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .trx-date {
+            font-size: 11px;
+            color: #555;
+        }
+
+        .trx-notrx {
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            color: #444;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .trx-notrx.custom {
+            color: #1e88e5;
+            font-weight: 700;
+        }
+
+        .trx-edit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(229, 57, 53, 0.1);
+            color: #e53935;
+            margin-top: 8px;
+        }
+
+        .trx-edit-badge.custom-set {
+            background: rgba(30, 136, 229, 0.1);
+            color: #1e88e5;
+        }
+
+        /* ── LOADING ── */
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #444;
+            font-size: 13px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #1a1a26;
+            border-top-color: #e53935;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── BOTTOM SHEET / MODAL ── */
+        .sheet-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .sheet-backdrop.open { display: flex; }
+
+        .sheet {
+            background: #1a1a26;
+            border: 1px solid #2a2a3a;
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 520px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding-bottom: 30px;
+        }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .sheet-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid #25253a;
+            position: sticky;
+            top: 0;
+            background: #1a1a26;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .sheet-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #e8e8f0;
+        }
+
+        .sheet-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #25253a;
+            border: none;
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .sheet-close:hover { background: #e53935; color: #fff; }
+
+        .sheet-body {
+            padding: 20px;
+        }
+
+        /* Info row in sheet */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #25253a;
+        }
+
+        .info-row:last-of-type { border-bottom: none; margin-bottom: 20px; }
+
+        .info-label {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .info-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e8e8f0;
+            text-align: right;
+            max-width: 200px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .info-val.green { color: #4caf50; font-family: 'Inter', sans-serif; }
+        .info-val.red { color: #e53935; font-family: 'Inter', sans-serif; }
+
+        /* Reset button */
+        .reset-btn {
+            background: transparent;
+            border: 1.5px solid #2a2a3a;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #666;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .reset-btn:hover { border-color: #e53935; color: #e53935; }
+
+        /* Form */
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #12121c;
+            border: 1.5px solid #2a2a3a;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 15px;
+            color: #e8e8f0;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            outline: none;
+            letter-spacing: 0.5px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .form-input:focus {
+            border-color: #e53935;
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.12);
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: #444;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .form-hint span {
+            color: #e53935;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e53935, #b71c1c);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .save-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(229,57,53,0.35); }
+        .save-btn:active { transform: translateY(0); }
+        .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #1e1e30;
+            border: 1px solid #3a3a50;
+            border-radius: 14px;
+            padding: 13px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e8e8f0;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            z-index: 999;
+            white-space: nowrap;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.ok .toast-icon { color: #4caf50; }
+        .toast.err .toast-icon { color: #e53935; }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #444;
+        }
+
+        .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
+        .empty-state p { font-size: 14px; }
+
+        /* ── COUNT BAND ── */
+        .count-band {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px 12px;
+        }
+
+        .count-text {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .count-text span { color: #e8e8f0; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon">✓</span>
+        <span id="toastMsg">Tersimpan!</span>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-top">
+            <h1>✏️ Edit Nomor Transaksi</h1>
+            <span class="live-dot">Live</span>
+        </div>
+        <div class="header-sub">Tap transaksi untuk ubah nomernya</div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+        <div class="search-rel">
+            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Cari transaksi..." oninput="filterList()">
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">Semua</button>
+        <button class="filter-tab" onclick="setFilter('payment', this)">Pembayaran</button>
+        <button class="filter-tab" onclick="setFilter('debt', this)">Tagihan</button>
+        <button class="filter-tab" onclick="setFilter('custom', this)">Sudah Diedit</button>
+    </div>
+
+    <!-- Count -->
+    <div class="count-band">
+        <div class="count-text">Menampilkan <span id="countDisplay">0</span> transaksi</div>
+    </div>
+
+    <!-- Section -->
+    <div class="section-title">Daftar Transaksi</div>
+
+    <!-- List -->
+    <div class="trx-list" id="trxList">
+        <div class="loading-state">
+            <div class="spinner"></div>
+            Memuat data dari Firebase...
+        </div>
+    </div>
+
+    <!-- Bottom Sheet Edit -->
+    <div class="sheet-backdrop" id="editSheet" onclick="if(event.target===this)closeSheet()">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-title">Edit Nomor Transaksi</span>
+                <button class="sheet-close" onclick="closeSheet()">✕</button>
+            </div>
+            <div class="sheet-body">
+
+                <!-- Info rows -->
+                <div class="info-row">
+                    <span class="info-label">Jenis</span>
+                    <span class="info-val" id="sType">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tanggal</span>
+                    <span class="info-val" id="sDate">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nominal</span>
+                    <span class="info-val" id="sAmount">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nomor Transaksi Otomatis</span>
+                    <span class="info-val" id="sAutoNoTrx" style="font-size:11px;">-</span>
+                </div>
+
+                <!-- Reset button (only if has custom) -->
+                <button class="reset-btn" id="resetBtn" onclick="resetNoTrx()" style="display:none;">
+                    🔄 Reset ke nomor otomatis
+                </button>
+
+                <!-- Form -->
+                <label class="form-label" for="inputNoTrx">Nomor Transaksi Baru</label>
+                <input
+                    type="text"
+                    id="inputNoTrx"
+                    class="form-input"
+                    placeholder="Contoh: TRX-ABC12345"
+                    maxlength="60"
+                    onkeydown="if(event.key==='Enter')saveNoTrx()"
+                >
+                <div class="form-hint">
+                    Kosongkan untuk pakai nomor otomatis, atau klik
+                    <span onclick="useAutoNoTrx()">pakai nomor otomatis</span>
+                    sebagai titik awal lalu edit.
+                </div>
+
+                <button class="save-btn" id="saveBtn" onclick="saveNoTrx()">
+                    💾 Simpan Nomor Transaksi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVDSAuf-jqAp-KwG5JcLTdgy2MPidSs_M",
+            authDomain: "utang-1.firebaseapp.com",
+            databaseURL: "https://utang-1-default-rtdb.firebaseio.com",
+            projectId: "utang-1",
+            storageBucket: "utang-1.firebasestorage.app",
+            messagingSenderId: "382580515654",
+            appId: "1:382580515654:web:b4859edf022d165c997b47",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const transRef = ref(db, 'transactions');
+
+        let allTrx = [];
+        let currentFilter = 'all';
+        let currentKey = null;
+        let currentAutoNoTrx = '';
+
+        // ── FORMAT HELPERS
+        function formatRp(n) {
+            n = parseFloat(n) || 0;
+            return 'Rp ' + Math.abs(n).toLocaleString('id-ID');
+        }
+
+        function autoNoTrx(key, dateStr) {
+            const d = new Date(dateStr);
+            const datePart = d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '');
+            return 'TRX-' + key.substring(0, 8).toUpperCase() + '-' + datePart;
+        }
+
+        // ── REALTIME
+        onValue(transRef, (snap) => {
+            allTrx = [];
+            if (snap.exists()) {
+                snap.forEach(child => {
+                    allTrx.push({ key: child.key, ...child.val() });
+                });
+                allTrx.sort((a, b) => new Date(b.date) - new Date(a.date));
+            }
+            renderList();
+        });
+
+        // ── RENDER
+        function renderList() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const list = document.getElementById('trxList');
+
+            let filtered = allTrx.filter(t => {
+                const matchQ = !q ||
+                    (t.type || '').toLowerCase().includes(q) ||
+                    (t.noTrx || '').toLowerCase().includes(q) ||
+                    autoNoTrx(t.key, t.date).toLowerCase().includes(q);
+
+                if (!matchQ) return false;
+
+                if (currentFilter === 'payment') return parseFloat(t.amount) < 0;
+                if (currentFilter === 'debt') return parseFloat(t.amount) > 0;
+                if (currentFilter === 'custom') return !!t.noTrx;
+                return true;
+            });
+
+            document.getElementById('countDisplay').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <p>Tidak ada transaksi ditemukan.</p>
+                </div>`;
+                return;
+            }
+
+            list.innerHTML = filtered.map(t => {
+                const amt = parseFloat(t.amount);
+                const isPayment = amt < 0;
+                const amtCls = isPayment ? 'green' : 'red';
+                const sign = isPayment ? '−' : '+';
+                const dateStr = new Date(t.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                const autoNo = autoNoTrx(t.key, t.date);
+                const displayNo = t.noTrx || autoNo;
+                const hasCustom = !!t.noTrx;
+
+                return `<div class="trx-card ${hasCustom ? 'has-custom' : ''}" onclick='openSheet(${JSON.stringify(t)})'>
+                    <div class="trx-card-top">
+                        <div class="trx-type">${t.type || '-'}</div>
+                        <div class="trx-amt ${amtCls}">${sign} ${formatRp(amt)}</div>
+                    </div>
+                    <div class="trx-meta">
+                        <span class="trx-date">${dateStr}</span>
+                        <span class="trx-notrx ${hasCustom ? 'custom' : ''}">${displayNo}</span>
+                    </div>
+                    <div class="trx-edit-badge ${hasCustom ? 'custom-set' : ''}">
+                        ${hasCustom ? '✏️ Sudah Diedit' : '🔲 Tap untuk edit nomer'}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── OPEN SHEET
+        window.openSheet = (t) => {
+            currentKey = t.key;
+            const amt = parseFloat(t.amount);
+            const isPayment = amt < 0;
+            const dateStr = new Date(t.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const autoNo = autoNoTrx(t.key, t.date);
+            currentAutoNoTrx = autoNo;
+
+            document.getElementById('sType').textContent = t.type || '-';
+            document.getElementById('sAmount').textContent = (isPayment ? '− ' : '+ ') + formatRp(amt);
+            document.getElementById('sAmount').className = 'info-val ' + (isPayment ? 'green' : 'red');
+            document.getElementById('sDate').textContent = dateStr;
+            document.getElementById('sAutoNoTrx').textContent = autoNo;
+
+            const customVal = t.noTrx || '';
+            document.getElementById('inputNoTrx').value = customVal;
+            document.getElementById('resetBtn').style.display = customVal ? 'block' : 'none';
+
+            document.getElementById('editSheet').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('inputNoTrx').focus(), 350);
+        };
+
+        window.closeSheet = () => {
+            document.getElementById('editSheet').classList.remove('open');
+            document.body.style.overflow = '';
+            currentKey = null;
+        };
+
+        // ── USE AUTO
+        window.useAutoNoTrx = () => {
+            document.getElementById('inputNoTrx').value = currentAutoNoTrx;
+            document.getElementById('inputNoTrx').focus();
+        };
+
+        // ── RESET
+        window.resetNoTrx = async () => {
+            if (!currentKey) return;
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            try {
+                await update(ref(db, `transactions/${currentKey}`), { noTrx: null });
+                showToast('Reset ke nomor otomatis ✓', true);
+                closeSheet();
+            } catch (e) {
+                showToast('Gagal: ' + e.message, false);
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        // ── SAVE
+        window.saveNoTrx = async () => {
+            if (!currentKey) return;
+            const val = document.getElementById('inputNoTrx').value.trim();
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan...';
+            try {
+                // If empty, remove custom (null = use auto)
+                await update(ref(db, `transactions/${currentKey}`), { noTrx: val || null });
+                showToast(val ? `Tersimpan: ${val}` : 'Direset ke otomatis ✓', true);
+                closeSheet();
+            } catch (e) {
+                showToast('Gagal: ' + e.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Simpan Nomor Transaksi';
+            }
+        };
+
+        // ── FILTER
+        window.setFilter = (f, el) => {
+            currentFilter = f;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            renderList();
+        };
+
+        window.filterList = () => renderList();
+
+        // ── TOAST
+        function showToast(msg, ok) {
+            const t = document.getElementById('toast');
+            t.className = 'toast ' + (ok ? 'ok' : 'err');
+            document.getElementById('toastIcon').textContent = ok ? '✓' : '✕';
+            document.getElementById('toastMsg').textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3200);
+        }
+
+        // ── ESC to close
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeSheet();
+        });
+    </script>
+</body>
+</html>
